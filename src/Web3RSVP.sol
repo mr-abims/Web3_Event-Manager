@@ -19,7 +19,7 @@ contract Web3RSVP {
 
     event DepositsPaidOut(bytes32 eventID);
 
-    struct CreateEvent {
+    struct EventInfo {
         bytes32 eventId;
         string eventDataCID;
         address eventOwner;
@@ -31,7 +31,7 @@ contract Web3RSVP {
         bool paidOut;
     }
 
-    mapping(bytes32 => CreateEvent) public idToEvent;
+    mapping(bytes32 => EventInfo) public idToEvent;
 
     function createNewEvent(
         uint256 eventTimestamp,
@@ -54,8 +54,8 @@ contract Web3RSVP {
         address[] memory claimedRSVPs;
 
 
-        //this creates a new CreateEvent struct and adds it to the idToEvent mapping
-        idToEvent[eventId] = CreateEvent(
+        //this creates a new EventInfo struct and adds it to the idToEvent mapping
+        idToEvent[eventId] = EventInfo(
             eventId,
             eventDataCID,
             msg.sender,
@@ -79,7 +79,7 @@ contract Web3RSVP {
 
     function createNewRSVP(bytes32 eventId) external payable {
         // look up event
-        CreateEvent storage myEvent = idToEvent[eventId];
+        EventInfo storage myEvent = idToEvent[eventId];
 
         // transfer deposit to our contract / require that they sent in enough ETH
         require(msg.value == myEvent.deposit, "NOT ENOUGH");
@@ -105,7 +105,7 @@ contract Web3RSVP {
 
     function confirmAllAttendees(bytes32 eventId) external {
         // look up event
-        CreateEvent memory myEvent = idToEvent[eventId];
+        EventInfo memory myEvent = idToEvent[eventId];
 
         // make sure you require that msg.sender is the owner of the event
         require(msg.sender == myEvent.eventOwner, "NOT AUTHORIZED");
@@ -118,7 +118,7 @@ contract Web3RSVP {
 
     function confirmAttendee(bytes32 eventId, address attendee) public {
         // look up event
-        CreateEvent storage myEvent = idToEvent[eventId];
+        EventInfo storage myEvent = idToEvent[eventId];
 
         // make sure you require that msg.sender is the owner of the event
         require(msg.sender == myEvent.eventOwner, "NOT AUTHORIZED");
@@ -161,7 +161,7 @@ contract Web3RSVP {
 
     function withdrawUnclaimedDeposits(bytes32 eventId) external {
         // look up event
-        CreateEvent memory myEvent = idToEvent[eventId];
+        EventInfo memory myEvent = idToEvent[eventId];
 
         // check if already paid
         require(!myEvent.paidOut, "ALREADY PAID");
